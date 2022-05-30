@@ -1,4 +1,7 @@
+from collections import defaultdict
+import enum
 from random import randint
+
 class Queue:
     def __init__(self, value : any = None) -> None:
         self.value = value
@@ -164,19 +167,20 @@ class minHeap:
     def __init__(self) -> None:
         self.heap = []
         
-    def insert(self, val : int) -> None:
+    def insert(self, val : any, fnc_compare :  "function") -> None:
         """ Insert Value into minHeap. The minimum value located at idx -1
 
         Args:
-            val (int): Value that want to be inserted to the minHeap 
+            val (any): Value that want to be inserted to the minHeap 
+            fnc_compare(function) : function to compare value in order to determine the location of val in the heap
         """
         if len(self.heap) == 0:
             self.heap.append(val)
 
-        elif val < self.heap[-1]:
+        elif fnc_compare(val, self.heap[-1]):
             self.heap = self.heap + [val]
             
-        elif val >= self.heap[0]:
+        elif not fnc_compare(val, self.heap[0]): # not val[1] < self.heap[0][1]
             self.heap = [val] + self.heap
 
         else:
@@ -184,15 +188,15 @@ class minHeap:
             # Binary search to find the correct placement of the value
             while start <= end:
                 center = start + (end - start) // 2
-                if self.heap[center] < val:
-                    # val is greatr than center, therefore its place is located on the left side of center
+                if fnc_compare(self.heap[center], val):
+                    # val[1] is greatr than center, therefore its place is located on the left side of center
                     end = center - 1
 
                 else:
-                    # val is smaller, therefore is on the right side of center
+                    # val[1] is smaller, therefore is on the right side of center
                     start = center + 1
 
-            if self.heap[center] < val:
+            if fnc_compare(self.heap[center], val):
                 # place val on the left side
                 self.heap = self.heap[:center] + [val] + self.heap[center:]
 
@@ -201,17 +205,53 @@ class minHeap:
                 self.heap = self.heap[:center + 1] + [val] + self.heap[center + 1:]
 
     
-    def pop(self) -> int:
+    def pop(self) -> any:
         """Remove the minimum value in the heap
 
         Returns:
-            int: the minimum value
+            any : return the minimum value in the heap
         """
         return self.heap.pop()
-        
+    
+    @classmethod
+    def heapify(cls, arr : list[str, int]) -> "minHeap":
+        # create a heap from 
+        arr.sort(reverse = True, key = lambda x:x[1])
+        heap = cls()
+        heap.heap = arr
+        return heap
     
        
-class HuffmanEncoding:
+class HuffmanEncoding():
+    @classmethod
+    def TableFromTree(cls, huffTree : Tree) -> dict:
+        """Generate a encodedTable from huffman Tree
+
+        Args:
+            encodeTree (Tree): Tree Used in Creating the Huffman Encoding
+
+        Returns:
+            dict: Conversion Table
+        """
+        encodeTable = {}
+        
+        # tranverse the tree
+        stack = [(huffTree, "")]
+        
+        # for node that has val[0] == "", there always exist two child,
+        while len(stack) > 0:
+            root, encodedBits = stack.pop()
+            # if val[0] in root isn't "" then add entry to table
+            if root.val[0] != "":
+                dict[root.val[0]] = encodedBits
+                continue
+                
+            # if go left add "0" to encodedBits else add 1
+            stack.append([root.left, encodedBits + "0"])
+            stack.append([root.right, encodedBits + "1"])
+            
+        return encodeTable
+    
     @classmethod
     def encode(cls, text : str) -> str:
         """ Compress text using huffman encoding
@@ -222,20 +262,46 @@ class HuffmanEncoding:
         Returns:
             str : encoded text in bits
         """
-        pass
-    
-    @staticmethod
-    def TableFromTree(encodeTree : Tree) -> dict:
-        """Generate a table to get the original message from the encodedText
+        def characterFrequency(text : str) -> dict:
+            frequencyTable = defaultdict(int)
+            for char in text:
+                dict[char] += 1
+                
+            return frequencyTable
+        
+        def createHuffTree(FreqTable : minHeap):
+            while len(freqTable.heap) > 1:
+                # pick two minimum freq node and combine to create a new root
+                min_1 = freqTable.pop()
+                min_2 = freqTable.pop()
 
-        Args:
-            encodeTree (Tree): Tree Used in Creating the Huffman Encoding
+                root = Tree(["", min_1.val[1] + min_2.val[1]])
 
-        Returns:
-            dict: Conversion Table
-        """
-        pass
+                root.left = min_1
+                root.right = min_2
+
+                freqTable.insert(root)
+                
+            return freqTable.heap[0]
     
+        freqTable = list(characterFrequency(text))
+        freqTable = minHeap.heapify(freqTable)
+        
+        # change the entry in minheap into a tree
+        for (i, elmt) in enumerate(freqTable.heap):
+            freqTable[i] = Tree(elmt)
+        
+        # create huff tree
+        huffTree = createHuffTree(freqTable)
+        
+        # encode 
+        encodedTable = cls.TableFromTree(huffTree)
+        encodedMessage = ""
+        for char in text:
+            encodedMessage += encodedTable[char]
+            
+        return encodedMessage
+        
     @classmethod
     def decode(cls, encodedText : str, table : dict) -> str:
         """Get the original message back from the encoded text
@@ -302,9 +368,9 @@ if __name__ == "__main__":
     # testEncodedTree = Tree.encodeTree(testTree)
     # print(testEncodedTree)
     
-    testEncodedTree = "|(j,25)||(S,584)||(~,46)||(>,611)||(:,723)|(%,614)|||(a,235)|(Q,392)||(,,671)|(V,773)"
-    testTreeDecoded = Tree.decodeTree(testEncodedTree)
-    print()
+    # testEncodedTree = "|(j,25)||(S,584)||(~,46)||(>,611)||(:,723)|(%,614)|||(a,235)|(Q,392)||(,,671)|(V,773)"
+    # testTreeDecoded = Tree.decodeTree(testEncodedTree)
+    # print()
     
     # arr = [1, 2, 3]
     # queue = Queue()
@@ -315,3 +381,21 @@ if __name__ == "__main__":
     # for i in range(len(arr)):
         # queue, elmt = queue.pop()
         # print(elmt)
+        
+    # test for minheap
+    # arr = [["a", 1], ["c", 3], ["f", 3], ["g", 10], ["e", 2]]
+    # arr = minHeap.heapify(arr)
+    # for (i, elmt) in enumerate(arr.heap):
+        # arr.heap[i] = Tree(elmt)    
+    
+    # newArr = [["", 3], ["", 11], ["", -1], ["", 4], ["", 6]]
+    # for elmt in newArr:
+        # node = Tree(elmt)
+        # arr.insert(node, lambda x, y: x.val[1] < y.val[1])
+        
+    # print()  
+    # for elmt in arr.heap:
+        # print(elmt.val)
+    
+    pass
+    
