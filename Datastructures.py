@@ -75,8 +75,7 @@ class Tree:
             
                 
         return encodedTree[:i]
-        
-        
+  
     @classmethod
     def decodeTree(cls, str : str):
         """Create a tree from an encoded tree in a string
@@ -154,8 +153,6 @@ class Tree:
 
         return temp
                     
-                    
-
 class minHeap:
     """
     Heap data structures using array. The array, therefore, is sorted in decreasing order
@@ -216,3 +213,4 @@ class minHeap:
         heap = cls()
         heap.heap = arr
         return heap
+    
