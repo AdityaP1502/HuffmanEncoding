@@ -64,3 +64,41 @@ class Testing:
                     stack.append(root.right)
                              
         return temp
+    
+if __name__ == "__main__":
+    # testTree = Testing.createRandomTree(10)
+    # testEncodedTree = Tree.encodeTree(testTree)
+    # print(testEncodedTree)
+    
+    # testEncodedTree = "|(j,25)||(S,584)||(~,46)||(>,611)||(:,723)|(%,614)|||(a,235)|(Q,392)||(,,671)|(V,773)"
+    # testTreeDecoded = Tree.decodeTree(testEncodedTree)
+    # print()
+    
+    # arr = [1, 2, 3]
+    # queue = Queue()
+    
+    # for i in range(len(arr)):
+        # queue.insert(arr[i])
+        
+    # for i in range(len(arr)):
+        # queue, elmt = queue.pop()
+        # print(elmt)
+        
+    # test for minheap
+    # arr = [["a", 1], ["c", 3], ["f", 3], ["g", 10], ["e", 2]]
+    # arr = minHeap.heapify(arr)
+    # for (i, elmt) in enumerate(arr.heap):
+        # arr.heap[i] = Tree(elmt)    
+    
+    # newArr = [["", 3], ["", 11], ["", -1], ["", 4], ["", 6]]
+    # for elmt in newArr:
+        # node = Tree(elmt)
+        # arr.insert(node, lambda x, y: x.val[1] < y.val[1])
+        
+    # print()  
+    # for elmt in arr.heap:
+        # print(elmt.val)
+    
+    text = "Hello, my name is KNTL PAPAPAPA. Lived in NIHON, Hobby is staring at a wall while thinking about life decisions."
+    encodedMessage, huffTree = HuffmanEncoding.encode(text)
+    print(encodedMessage)
