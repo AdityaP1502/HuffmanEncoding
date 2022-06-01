@@ -1,6 +1,5 @@
 from collections import defaultdict
-from random import randint
-from Datastructures import Tree, Queue, minHeap
+from Datastructures import Tree, minHeap
    
 class HuffmanEncoding():
     @classmethod
@@ -23,7 +22,7 @@ class HuffmanEncoding():
             root, encodedBits = stack.pop()
             # if val[0] in root isn't "" then add entry to table
             if root.val[0] != "":
-                dict[root.val[0]] = encodedBits
+                encodeTable[root.val[0]] = encodedBits
                 continue
                 
             # if go left add "0" to encodedBits else add 1
@@ -33,19 +32,19 @@ class HuffmanEncoding():
         return encodeTable
     
     @classmethod
-    def encode(cls, text : str) -> str:
+    def encode(cls, text : str) -> tuple[str, str]:
         """ Compress text using huffman encoding
 
         Args:
             text (str): a text
             
         Returns:
-            str : encoded text in bits
+            tuple[str, str] : Tuple that contains the encoded message in bits and the encoded huffman Tree
         """
         def characterFrequency(text : str) -> dict:
             frequencyTable = defaultdict(int)
             for char in text:
-                dict[char] += 1
+                frequencyTable[char] += 1
                 
             return frequencyTable
         
@@ -60,27 +59,36 @@ class HuffmanEncoding():
                 root.left = min_1
                 root.right = min_2
 
-                freqTable.insert(root)
+                freqTable.insert(root, lambda x, y: x.val[1] < y.val[1])
                 
             return freqTable.heap[0]
     
-        freqTable = list(characterFrequency(text))
-        freqTable = minHeap.heapify(freqTable)
+        freqTable = characterFrequency(text)
+        
+        # change freqTable into 2D array
+        freqTable_Array = []
+        for (char, freq) in freqTable.items():
+            freqTable_Array.append((char, freq))
+             
+        freqTable = minHeap.heapify(freqTable_Array)
         
         # change the entry in minheap into a tree
         for (i, elmt) in enumerate(freqTable.heap):
-            freqTable[i] = Tree(elmt)
+            freqTable.heap[i] = Tree(elmt)
         
         # create huff tree
         huffTree = createHuffTree(freqTable)
         
-        # encode 
+        # encode the tree
+        encodedHuffTree = Tree.encodeTree(huffTree)
+        
+        # encode the message
         encodedTable = cls.TableFromTree(huffTree)
         encodedMessage = ""
         for char in text:
             encodedMessage += encodedTable[char]
-            
-        return encodedMessage
+        
+        return encodedMessage, encodedHuffTree
         
     @classmethod
     def decode(cls, encodedText : str, table : dict) -> str:
@@ -95,87 +103,8 @@ class HuffmanEncoding():
         """
         pass
     
-class Testing:
-    @classmethod
-    def createRandomTree(cls, n : int):
-        vals = [randint(0, 1000) for i in range(n)]
-        chars = [chr(randint(32, 126)) for i in range(n)]
-        
-        arr = list(zip(chars, vals))
-        
-        root = Tree(arr[0])
-        temp = root
-        del arr[0]
-        
-        stack = [root]
-        
-        i = 0
-        
-        while len(arr) > 0:
-            root = stack.pop()
-            
-            null = randint(0, 1)
-            if null == 1:
-                # left node is null
-                root.right = Tree(arr[i])
-                del arr[i]
-                stack.append(root.right)
-                 
-            else:
-                root.left = Tree(arr[i])
-                del arr[i]
-                
-                stack.append(root.left)
-                
-                null = randint(0, 1)
-                
-                if len(arr) == 0:
-                    break
-                
-                if null == 0:
-                    root.right = Tree(arr[i])
-                    del arr[i]
-                    
-                    stack.append(root.right)
-                             
-        return temp
-                
-            
-      
 
-if __name__ == "__main__":
-    # testTree = Testing.createRandomTree(10)
-    # testEncodedTree = Tree.encodeTree(testTree)
-    # print(testEncodedTree)
-    
-    # testEncodedTree = "|(j,25)||(S,584)||(~,46)||(>,611)||(:,723)|(%,614)|||(a,235)|(Q,392)||(,,671)|(V,773)"
-    # testTreeDecoded = Tree.decodeTree(testEncodedTree)
-    # print()
-    
-    # arr = [1, 2, 3]
-    # queue = Queue()
-    
-    # for i in range(len(arr)):
-        # queue.insert(arr[i])
-        
-    # for i in range(len(arr)):
-        # queue, elmt = queue.pop()
-        # print(elmt)
-        
-    # test for minheap
-    # arr = [["a", 1], ["c", 3], ["f", 3], ["g", 10], ["e", 2]]
-    # arr = minHeap.heapify(arr)
-    # for (i, elmt) in enumerate(arr.heap):
-        # arr.heap[i] = Tree(elmt)    
-    
-    # newArr = [["", 3], ["", 11], ["", -1], ["", 4], ["", 6]]
-    # for elmt in newArr:
-        # node = Tree(elmt)
-        # arr.insert(node, lambda x, y: x.val[1] < y.val[1])
-        
-    # print()  
-    # for elmt in arr.heap:
-        # print(elmt.val)
-    
-    pass
+                
+            
+
     
