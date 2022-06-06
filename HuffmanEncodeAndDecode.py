@@ -3,15 +3,21 @@ from Datastructures import Tree, minHeap
    
 class HuffmanEncoding():
     @classmethod
-    def TableFromTree(cls, huffTree : Tree) -> dict:
+    def TableFromTree(cls, huffTree : Tree, key : str = "chr" ) -> dict:
         """Generate a encodedTable from huffman Tree
 
         Args:
             encodeTree (Tree): Tree Used in Creating the Huffman Encoding
+            key (str) : Specify the key of the table. (chr or bits)
 
         Returns:
             dict: Conversion Table
         """
+        
+        if key != "chr" and key != "bits":
+            print("\"{}\" is not recognized as a VALID key".format(key))
+            exit()
+            
         encodeTable = {}
         
         # tranverse the tree
@@ -22,7 +28,12 @@ class HuffmanEncoding():
             root, encodedBits = stack.pop()
             # if val[0] in root isn't "" then add entry to table
             if root.val[0] != "":
-                encodeTable[root.val[0]] = encodedBits
+                if key == "chr":
+                    encodeTable[root.val[0]] = encodedBits
+                    
+                else:
+                    encodeTable[encodedBits] = root.val[0]
+                    
                 continue
                 
             # if go left add "0" to encodedBits else add 1
@@ -80,8 +91,8 @@ class HuffmanEncoding():
         huffTree = createHuffTree(freqTable)
         
         # encode the tree
-        encodedHuffTree = Tree.encodeTree(huffTree)
         
+        encodedHuffTree = Tree.encodeTree(huffTree)
         # encode the message
         encodedTable = cls.TableFromTree(huffTree)
         encodedMessage = ""
@@ -91,17 +102,33 @@ class HuffmanEncoding():
         return encodedMessage, encodedHuffTree
         
     @classmethod
-    def decode(cls, encodedText : str, table : dict) -> str:
+    def decode(cls, encodedText : str,  huffEncoded : str) -> str:
         """Get the original message back from the encoded text
 
         Args:
             encodedText (str): Encoded message in bits using huffman encoding
-            table (dict): Conversion Table
+            huffEncoded (str) : Huffman Tree String
 
         Returns:
             str: Original message
         """
-        pass
+        huffTree = Tree.decodeTree(huffEncoded)
+        
+        encodeTable = cls.TableFromTree(huffTree, key = "bits")
+        
+        encodedMessage = ""
+        originalMessage = ""
+        
+        for bit in encodedText:
+            encodedMessage += bit
+            if encodeTable.get(encodedMessage) != None:
+                originalMessage += encodeTable[encodedMessage]
+                encodedMessage = ""
+                
+        return originalMessage
+                
+                
+        
     
 
                 
