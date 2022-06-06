@@ -14,7 +14,7 @@ class Queue:
         if self.value == None:
             self.value = value
             self.next = None
-            self.tail = None
+            self.tail = self
             
         elif self.tail == None:
             tail = Queue(value)
@@ -23,6 +23,7 @@ class Queue:
             
         else:
             newTail = Queue(value)
+            
             self.tail.next = newTail
             self.tail = newTail
             
@@ -37,8 +38,16 @@ class Queue:
         
         if self == None:
             self = Queue()
+            
+        self.tail = temp.tail
         
         return self, temp.value
+    
+    def isEmpty(self):
+        if self.value == None and self.next == None:
+            return True
+        
+        return False
         
         
 class Tree:
@@ -55,26 +64,46 @@ class Tree:
             root (Tree): An object to tree
         """
         
-        encodedTree, stack = "", [root]
         
-        while len(stack) != 0:
-            root = stack.pop()
+        # the queue seems can't handle none value, to get around put inside a tuple
+        
+        # encodedTree, queue = "", Queue((root)) # why this doesn't work?
+        encodedTree, queue = "", Queue((root, 0, 0))  # why this work? WTFFFF!!!!
+        
+        
+        while not queue.isEmpty():
+            queue, (root, a_,b_) = queue.pop() 
+            # queue, root = queue.pop()
+            
+            # if lvl != currLevel:
+                # currLevel = lvl
+                # NodePos, lastNodePos = 0, -1
+            
+            # encodedTree += "||" * ((Pos - lastNodePos) - 1) if Pos > lastNodePos else ""
+            # lastNodePos = Pos # Update last position
             
             rootStr = "({},{})".format(root.val[0], root.val[1]) if root != None else ""
             
             encodedTree += "|{}".format(rootStr)
 
             if root != None:
-                stack.append(root.right)
-                stack.append(root.left)
+                queue.insert((root.left, 0, 0))
+                queue.insert((root.right, 0, 0))
+                # queue.insert((root.left))
+                # queue.insert((root.right))
+                
+            # NodePos += 1
             
-        # remove trailing |
-        for i in range(len(encodedTree) - 1, 0, -1):
-            if encodedTree[i - 1] != "|":
-                break
+        # remove trailing | if exist
+        if encodedTree[-1] == "|":
+            for i in range(len(encodedTree) - 1, 0, -1):
+                if encodedTree[i - 1] != "|":
+                    break
+                
+            encodedTree = encodedTree[:i]
             
                 
-        return encodedTree[:i]
+        return encodedTree
   
     @classmethod
     def decodeTree(cls, str : str):
@@ -97,7 +126,7 @@ class Tree:
                     value.append(int(temp))
                     break
                 
-                elif str[i] == "," and (str[i - 1] != "(" or str[i - 2] == "("):
+                elif str[i] == "," and (str[i + 1] != ","):
                     value.append(temp)
                     temp = ""
                     continue
@@ -117,7 +146,6 @@ class Tree:
         
         root = Tree(value)
         temp = root
-        
         queue = Queue(root)
         
         while i < len(str):
@@ -189,13 +217,13 @@ class minHeap:
                     # val[1] is smaller, therefore is on the right side of center
                     start = center + 1
 
-            if fnc_compare(self.heap[center], val):
-                # place val on the left side
-                self.heap = self.heap[:center] + [val] + self.heap[center:]
+            if fnc_compare(val, self.heap[center]):
+                # place val on the right side of center
+                self.heap = self.heap[:center + 1] + [val] + self.heap[center + 1:]
 
             else:
                 # place val on the right side of center
-                self.heap = self.heap[:center + 1] + [val] + self.heap[center + 1:]
+                self.heap = self.heap[:center] + [val] + self.heap[center:]
 
     
     def pop(self) -> any:
