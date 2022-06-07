@@ -57,11 +57,15 @@ class Tree:
         self.right = None
     
     @classmethod
-    def encodeTree(cls, root : "Tree"):
-        """Encode tree into a string
+    def encodeTree(cls, root : "Tree", compress : bool = True) -> str:
+        """Encode Tree Into a String
 
         Args:
-            root (Tree): An object to tree
+            root (Tree): Tree Datastructures that want to encoded into a string
+            compress (bool, optional): FLag to  compress the string. Defaults to True.
+
+        Returns:
+            str : Encoded Tree
         """
         
         
@@ -102,16 +106,70 @@ class Tree:
                 
             encodedTree = encodedTree[:i]
             
+        # Compressed the string
+        if compress:
+            # compressed repeated | into |n
+            # ex : |(a, 3)||||||||||||(b, 17)|... -> |(a, 3)|12(b, 17)|...
+            
+            # | at the end isn't counted so begin counting at 1
+            flag, count = False, 1
+            
+            encodedTree_compress = ""
+            
+            for i in range(len(encodedTree)):
+                # encodedTree doens't have trailing |, so encodedTree[i + 1] is safe
                 
+                if encodedTree[i] == "|" and encodedTree[i + 1] != "(":
+                    # begin counting repeated |
+                    count += 1
+                    flag = True
+                    
+                else:   
+                    if flag:
+                        encodedTree_compress += "|{}".format(count)
+                        count = 1
+                        flag = False
+                        
+                    else:
+                        encodedTree_compress += encodedTree[i]
+            
+            encodedTree = encodedTree_compress
+      
         return encodedTree
   
     @classmethod
-    def decodeTree(cls, str : str):
+    def decodeTree(cls, str : str, isCompress : bool = True):
         """Create a tree from an encoded tree in a string
 
         Args:
             str (str): Encoding of a tree
         """
+        def uncompress(str):
+            # Uncompress the encodedString
+            # ex : |(a, 15)|14(b, 15)...
+            
+            uncompress_str, i = "", 0
+            while i < len(str):
+                if str[i] == "|" and str[i + 1] != "(":
+                    # read the total repeated |
+                    num = ""
+                    
+                    for j in range(i + 1, len(str)):
+                        if str[j] == "(":
+                            break
+                        
+                        num += str[j]
+                        
+                    num = int(num)
+                    uncompress_str += "|" * num
+                    i = j
+                    
+                else:
+                    uncompress_str += str[i]
+                    i += 1
+                
+            return uncompress_str
+     
         def readVals(start : int, str : str):
             # read the vals in string
             value = []
@@ -140,6 +198,9 @@ class Tree:
 
             return value, i
         
+        if isCompress:
+            str = uncompress(str)
+            
         i = 0
         # get value for main root
         value, i = readVals(0, str)
